@@ -1,0 +1,228 @@
+{
+	"info": {
+		"_postman_id": "e561386d-4808-4167-a699-70d53d9b4b13",
+		"name": "QIWI TESTOVOE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47931905",
+		"_collection_link": "https://s-team-283685.postman.co/workspace/Team-Workspace~b5a52d0c-2ae6-4ea9-8fb5-6163649cb7bf/collection/47931905-e561386d-4808-4167-a699-70d53d9b4b13?action=share&source=collection_link&creator=47931905"
+	},
+	"item": [
+		{
+			"name": "Availability",
+			"item": []
+		},
+		{
+			"name": "Create Payments",
+			"item": []
+		},
+		{
+			"name": "Balance",
+			"item": []
+		},
+		{
+			"name": "Execute Payment",
+			"item": [
+				{
+					"name": "New Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Платеж исполнен\", () => {\r",
+									"    const data = pm.response.json();\r",
+									"    pm.expect(data.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payment/{{last_payment_id}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payment",
+								"{{last_payment_id}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "availability",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Сервис отвечает 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ответ в JSON\", () => {\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}payments",
+					"host": [
+						"{{baseUrl}}payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Баланс > 0\", () => {\r",
+							"    const data = pm.response.json();\r",
+							"    pm.expect(data.accounts[0].balance.amount).to.be.above(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/funding-sources/v2/persons/{{personId}}/accounts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"funding-sources",
+						"v2",
+						"persons",
+						"{{personId}}",
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Создан платеж на 1 рубль\", () => {\r",
+							"    const data = pm.response.json();\r",
+							"    pm.expect(data).to.have.property(\"id\");\r",
+							"    pm.expect(data.sum.amount).to.eql(1);\r",
+							"});\r",
+							"const data = pm.response.json();\r",
+							"pm.environment.set(\"last_payment_id\", data.id);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"{{$guid}}\",\r\n  \"sum\": {\r\n    \"amount\": 1,\r\n    \"currency\": \"643\"\r\n  },\r\n  \"paymentMethod\": {\r\n    \"type\": \"Account\",\r\n    \"accountId\": \"643\"\r\n  },\r\n  \"fields\": {\r\n    \"account\": \"{{account}}\"\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/sinap/api/v2/terms/{{providerId}}/payments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"sinap",
+						"api",
+						"v2",
+						"terms",
+						"{{providerId}}",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
